@@ -10,10 +10,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Handle(ctx context.Context, conn net.Conn) {
-    defer conn.Close()
-    decoder := json.NewDecoder(conn)
-    encoder := json.NewEncoder(conn)
+func Handle(ctx context.Context, api api.API, conn net.Conn) {
+	defer conn.Close()
+	decoder := json.NewDecoder(conn)
+	encoder := json.NewEncoder(conn)
 	for {
 		jr := messages.JsonRequest{}
 		err := decoder.Decode(&jr)
@@ -22,7 +22,6 @@ func Handle(ctx context.Context, conn net.Conn) {
 			return
 		}
 		log.Info().Any("request", jr).Msg("request received")
-		api := api.NewAPI()
 		resp := api.Receive(jr)
 		err = encoder.Encode(resp)
 		if err != nil {
