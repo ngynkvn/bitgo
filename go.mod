@@ -8,7 +8,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.33.0
-	github.com/sanity-io/litter v1.5.5
 )
 
 require (

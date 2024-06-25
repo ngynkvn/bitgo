@@ -5,6 +5,8 @@ import (
 	"bitgo/cmd/server/messages"
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
 	"net"
 
 	"github.com/rs/zerolog/log"
@@ -18,7 +20,9 @@ func Handle(ctx context.Context, api api.API, conn net.Conn) {
 		jr := messages.JsonRequest{}
 		err := decoder.Decode(&jr)
 		if err != nil {
-			log.Err(err).Msg("decode error, exiting")
+			if !errors.Is(err, io.EOF) {
+				log.Err(err).Msg("decode error, exiting")
+			}
 			return
 		}
 		log.Info().Any("request", jr).Msg("request received")

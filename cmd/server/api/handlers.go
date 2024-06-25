@@ -2,6 +2,7 @@ package api
 
 import (
 	"bitgo/cmd/server/messages"
+	"encoding/json"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -19,38 +20,52 @@ func NewAPI(db *sqlx.DB) API {
 
 func (api *API) Receive(jr messages.JsonRequest) messages.JsonResponse {
 	switch jr.Method {
-	case "version": return api.ResponseVersion(jr)
-	case "status": return api.ResponseStatus(jr)
-	case "add": return api.ResponseAddTorrent(jr)
-	default: return MethodNotImplemented(jr)
+	case "version":
+		return api.ResponseVersion(jr)
+	case "status":
+		return api.ResponseStatus(jr)
+	case "add":
+		return api.ResponseAddTorrent(jr)
+	default:
+		return MethodNotImplemented(jr)
 	}
 }
 
-
 func MethodNotImplemented(m messages.JsonRequest) messages.JsonResponse {
-	return messages.JsonResponse {
+	return messages.JsonResponse{
 		Error: fmt.Sprintf(`method not implemented: "%s"`, m.Method),
 	}
 }
 
 func MethodOK(m messages.JsonRequest) messages.JsonResponse {
-	return messages.JsonResponse {
+	return messages.JsonResponse{
 		Result: "OK",
 	}
 }
 
-
 func (api *API) ResponseVersion(m messages.JsonRequest) messages.JsonResponse {
 	return messages.JsonResponse{
 		Result: "bitgo 0.1",
-		ID: m.ID,
+		ID:     m.ID,
 	}
 }
 
 func (api *API) ResponseStatus(m messages.JsonRequest) messages.JsonResponse {
+	torrents, err := api.GetTorrents()
+	if err != nil {
+		return messages.JsonResponse{
+			Error: err.Error(),
+		}
+	}
+	result, err := json.Marshal(torrents)
+	if err != nil {
+		return messages.JsonResponse{
+			Error: err.Error(),
+		}
+	}
 	return messages.JsonResponse{
-		Result: `{"torrents":[]}`,
-		ID: m.ID,
+		Result: string(result),
+		ID:     m.ID,
 	}
 }
 
