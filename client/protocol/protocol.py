@@ -4,7 +4,6 @@ from dataclasses import dataclass, asdict
 import json
 
 
-@dataclass
 class Request:
     id: str = ""
 
@@ -16,11 +15,19 @@ class Request:
 @dataclass
 class RequestStatus(Request):
     method: str = "status"
+    id: str = ""
 
 
 @dataclass
 class RequestVersion(Request):
     method: str = "version"
+    id: str = ""
+
+
+@dataclass
+class RequestAddTorrent(Request):
+    path: str
+    method: str = "add"
 
 
 @dataclass
@@ -39,6 +46,9 @@ class BackendClient:
 
     def send_version(self) -> Response:
         return self.send(RequestVersion())
+
+    def send_add_torrent(self, path: str) -> Response:
+        return self.send(RequestAddTorrent(path))
 
     def send(self, req) -> Response:
         ser = json.dumps(asdict(req))

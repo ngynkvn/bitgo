@@ -1,9 +1,11 @@
 from socket import socket, AF_UNIX, SOCK_STREAM
+from typing import Any
 from textual import events
 from textual.screen import Screen
 from textual.suggester import SuggestFromList
+from textual.message import Message
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Log, Input, ListView
+from textual.widgets import Header, Footer, Log, Input, ListView, Button
 
 from protocol import BackendClient
 
@@ -19,12 +21,22 @@ class AddTorrent(Screen):
     def on_key(self, event: events.Key):
         pass
 
+    class Form(Message):
+        def __init__(self, path: str):
+            super().__init__()
+            self.path = path
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        self.post_message(self.Form(self.query_one(Input).value))
+        self.app.pop_screen()
+
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Input(
             placeholder="path",
             suggester=SuggestFromList(suggestions=["./torrent/debian.torrent"]),
         )
+        yield Button("Add", variant="primary")
         yield Log()
         yield Footer()
 
@@ -44,9 +56,9 @@ class Main(App):
         self.version = resp.result
         self.title = self.version
 
-    def on_key(self, event: events.Key) -> None:
-        if event.key == "A":
-            print("A")
+    def on_add_torrent_form(self, message: AddTorrent.Form) -> None:
+        resp = self.backend.send_add_torrent(message.path)
+        self.query_one(Log).write_line(resp.result)
 
     def on_ready(self):
         pass
