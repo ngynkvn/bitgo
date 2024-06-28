@@ -5,7 +5,6 @@ import (
 	"bitgo/cmd/server/messages"
 	"os"
 
-	"github.com/jackpal/bencode-go"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 )
@@ -16,8 +15,7 @@ func (api *API) AddTorrent(p messages.ParamsAddTorrent) error {
 		return err
 	}
 
-	torrentInfo := bittorrent.BencodeTorrent{}
-	err = bencode.Unmarshal(file, &torrentInfo)
+	torrentInfo, err := bittorrent.Open(file)
 	if err != nil {
 		return err
 	}
