@@ -1,5 +1,4 @@
 from socket import socket, AF_UNIX, SOCK_STREAM
-from typing import Any
 from textual import events
 from textual.screen import Screen
 from textual.suggester import SuggestFromList
